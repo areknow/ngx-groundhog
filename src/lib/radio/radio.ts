@@ -15,6 +15,7 @@ import {
   Optional,
   AfterViewInit,
   OnDestroy,
+  OnInit,
 } from '@angular/core';
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import { FocusMonitor, FocusOrigin } from '@angular/cdk/a11y';
@@ -165,6 +166,7 @@ export class GhRadioGroup extends _GhRadioGroupMixinBase {
 
   /** Set the name of every radio button to the groups name */
   private _updateRadioButtonNames(): void {
+    console.log(this._radios);
     if (this._radios) {
       this._radios.forEach(radio => {
         radio.name = this.name;
@@ -188,9 +190,9 @@ export class GhRadioGroup extends _GhRadioGroupMixinBase {
 
 // Boilerplate for applying mixins to GhRadioButton.
 export class GhRadioButtonBase {
-  constructor() { }
+  disabled: boolean;
 }
-export const _GhRadioButtonMixinBase = mixinTabIndex(mixinDisabled(GhRadioButtonBase));
+export const _GhRadioButtonMixinBase = mixinTabIndex(GhRadioButtonBase);
 
 @Component({
   moduleId: module.id,
@@ -211,11 +213,12 @@ export const _GhRadioButtonMixinBase = mixinTabIndex(mixinDisabled(GhRadioButton
   preserveWhitespaces: false,
 })
 export class GhRadioButton extends _GhRadioButtonMixinBase
-  implements AfterViewInit, OnDestroy, CanDisable, HasTabIndex {
+  implements OnInit, AfterViewInit, OnDestroy, CanDisable, HasTabIndex {
 
   private _uniqueId: string = `gh-radio-${++nextUniqueId}`;
   private _required: boolean;
   private _checked: boolean = false;
+  private _disabled: boolean = false;
   private _value: any = null;
   private _removeUniqueSelectionListener: () => void = () => {};
 
@@ -225,8 +228,17 @@ export class GhRadioButton extends _GhRadioButtonMixinBase
 
   /** Whether the radio button is required. */
   @Input()
-  get required(): boolean { return this._required; }
+  get required(): boolean {
+    return this._required || (this._radioGroup && this._radioGroup.required);
+  }
   set required(value: boolean) { this._required = coerceBooleanProperty(value); }
+
+  /** Whether the radio button is disabled. */
+  @Input()
+  get disabled(): boolean {
+    return this._disabled || (this._radioGroup != null && this._radioGroup.disabled);
+  }
+  set disabled(value: boolean) { this._disabled = coerceBooleanProperty(value); }
 
   /** Whether this radio button is checked. */
   @Input()
@@ -236,6 +248,15 @@ export class GhRadioButton extends _GhRadioButtonMixinBase
 
     if (this._checked != newCheckedState) {
       this._checked = newCheckedState;
+
+      if (newCheckedState && this._radioGroup && this._radioGroup.value != this.value) {
+        this._radioGroup.selected = this;
+      } else if (!newCheckedState && this._radioGroup && this._radioGroup.value == this.value) {
+        // When unchecking the selected radio button, update the selected radio
+        // property on the group.
+        this._radioGroup.selected = null;
+      }
+
       if (newCheckedState) {
         // Notify all radio buttons with the same name to un-check.
         this._radioDispatcher.notify(this.id, this.name);
@@ -250,6 +271,15 @@ export class GhRadioButton extends _GhRadioButtonMixinBase
   set value(value: any) {
     if (this._value != value) {
       this._value = value;
+      if (this._radioGroup != null) {
+        if (!this.checked) {
+          // Update checked when the value changed to match the radio group's value
+          this.checked = this._radioGroup.value == value;
+        }
+        if (this.checked) {
+          this._radioGroup.selected = this;
+        }
+      }
     }
   }
 
@@ -285,6 +315,13 @@ export class GhRadioButton extends _GhRadioButtonMixinBase
           this.checked = false;
         }
       });
+  }
+
+  ngOnInit() {
+    if (this._radioGroup) {
+      this.checked = this._radioGroup.value === this._value;
+      this.name = this._radioGroup.name;
+    }
   }
 
   ngAfterViewInit() {
