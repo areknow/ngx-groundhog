@@ -4,6 +4,7 @@
 @import '../../select/select-theme';
 @import '../../tile/tile-theme';
 @import '../../island/island-theme';
+@import '../../radio/radio-theme';
 
 @mixin gh-theme($theme) {
   @include gh-core-theme($theme);
@@ -11,5 +12,5 @@
   @include gh-progress-circle-theme($theme);
   @include gh-select-theme($theme);
   @include gh-tile-theme($theme);
-  @include gh-island-theme($theme);
+  @include gh-radio-theme($theme);
 }

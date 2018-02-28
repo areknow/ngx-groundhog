@@ -13,7 +13,7 @@
       </gh-radio-group>
     </div>
 
-    <div>
+    <div class="dark" ghTheme=":dark">
       <strong>Grouped by name</strong>
       <p>Value: {{singleValue}}</p>
       <p><gh-radio-button name="group1" value="homer" [checked]="singleValue == 'homer'" (change)="$event.value == 'homer' && singleValue = $event.value">Homer</gh-radio-button></p>

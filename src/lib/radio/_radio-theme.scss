@@ -1,0 +1,25 @@
+@import '../core/style/variables';
+@import '../core/theming/theming';
+
+@mixin gh-radio-theme($theme) {
+  $is-dark: map-get($theme, 'is-dark');
+
+  @if ($is-dark == true) {
+    .gh-radio-outer-circle {
+      border-color: #fff;
+    }
+    .gh-radio-button:not(.gh-radio-disabled):hover .gh-radio-outer-circle{
+      background-color: rgba(255, 255, 255, 0.2);
+      border-color: #fff;
+    }
+    .gh-radio-inner-circle,
+    .gh-radio-button:not(.gh-radio-disabled):hover .gh-radio-inner-circle {
+      background-color: #fff;
+    }
+  }
+}
+
+
+
+
+
