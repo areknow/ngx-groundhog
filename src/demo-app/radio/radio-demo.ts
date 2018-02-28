@@ -7,4 +7,6 @@ import {Component} from '@angular/core';
   styleUrls: ['radio-demo.css'],
 })
 export class RadioDemo {
+  groupValue = 'aberfeldy';
+  singleValue = 'homer';
 }
