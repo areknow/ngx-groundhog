@@ -45,6 +45,7 @@ export class DemoApp {
     {name: 'Input', route: '/input'},
     {name: 'Island', route: '/island'},
     {name: 'Progress circle', route: '/progress-circle'},
+    {name: 'Radio', route: '/radio'},
     {name: 'Select', route: '/select'},
     {name: 'Tile', route: '/tile'},
     {name: 'ContextMenu', route: '/context-menu'},

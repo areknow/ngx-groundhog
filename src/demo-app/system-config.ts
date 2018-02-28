@@ -54,6 +54,7 @@ System.config({
     '@dynatrace/ngx-groundhog/island': 'dist/packages/ngx-groundhog/island/index.js',
     '@dynatrace/ngx-groundhog/progress-circle':
       'dist/packages/ngx-groundhog/progress-circle/index.js',
+    '@dynatrace/ngx-groundhog/radio': 'dist/packages/ngx-groundhog/radio/index.js',
     '@dynatrace/ngx-groundhog/select': 'dist/packages/ngx-groundhog/select/index.js',
     '@dynatrace/ngx-groundhog/tile': 'dist/packages/ngx-groundhog/tile/index.js',
     '@dynatrace/ngx-groundhog/theming': 'dist/packages/ngx-groundhog/theming/index.js',

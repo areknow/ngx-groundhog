@@ -13,6 +13,7 @@ import {SelectDemo} from '../select/select-demo';
 import {ProgressCircleDemo} from '../progress-circle/progress-circle-demo';
 import {TileDemo} from 'tile/tile-demo';
 import {ContextMenuDemo} from '../context-menu/context-menu-demo';
+import {RadioDemo} from 'radio/radio-demo';
 
 @NgModule({
   imports: [
@@ -28,6 +29,7 @@ import {ContextMenuDemo} from '../context-menu/context-menu-demo';
     InputDemo,
     IslandDemo,
     ProgressCircleDemo,
+    RadioDemo,
     SelectDemo,
     TileDemo,
     DemoApp,
