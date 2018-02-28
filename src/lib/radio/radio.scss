@@ -1,0 +1,68 @@
+@import '../core/style/variables';
+
+$gh-radio-size: 20px;
+
+.gh-radio-button:not(.gh-radio-disabled) {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.gh-radio-disabled, .gh-radio-disabled .mat-radio-label {
+  cursor: default;
+}
+
+.gh-radio-label {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.gh-radio-container {
+  display: inline-block;
+  position: relative;
+  width: $gh-radio-size;
+  height: $gh-radio-size;
+  flex-shrink: 0;
+}
+
+// The outer circle for the radio, always present.
+.gh-radio-outer-circle {
+  display: block;
+  width: $gh-radio-size;
+  height: $gh-radio-size;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border-radius: 50%;
+  border: solid 2px $turquoise-600;
+  transition: border-color ease 280ms;
+}
+
+.gh-radio-inner-circle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width:  $gh-radio-size;
+  height:  $gh-radio-size;
+  border-radius: 50%;
+  background-color: $turquoise-600;
+  transition: transform ease 280ms, background-color ease 280ms;
+
+  // Note: This starts from 0.001 instead of 0, because transitioning from 0 to 0.5 causes
+  // IE to flash the entire circle for a couple of frames, throwing off the entire animation.
+  transform: scale(0.001);
+
+  .gh-radio-checked & {
+    transform: scale(0.5);
+  }
+}
+
+.gh-radio-label-content {
+  display: inline-block;
+  font-family: $mainfont;
+  font-size: 14px;
+  padding-left: 8px;
+}
