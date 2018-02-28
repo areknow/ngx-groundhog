@@ -166,7 +166,6 @@ export class GhRadioGroup extends _GhRadioGroupMixinBase {
 
   /** Set the name of every radio button to the groups name */
   private _updateRadioButtonNames(): void {
-    console.log(this._radios);
     if (this._radios) {
       this._radios.forEach(radio => {
         radio.name = this.name;
