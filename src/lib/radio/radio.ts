@@ -38,6 +38,7 @@ export const _GhRadioButtonMixinBase = mixinTabIndex(mixinDisabled(GhRadioButton
   selector: 'gh-radio-button',
   templateUrl: 'radio.html',
   styleUrls: ['radio.css'],
+  inputs: ['disabled', 'tabIndex'],
   host: {
     'class': 'gh-radio-button',
     '[class.gh-radio-checked]': 'checked',

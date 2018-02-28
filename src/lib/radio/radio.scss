@@ -5,9 +5,13 @@ $gh-radio-size: 20px;
 .gh-radio-button:not(.gh-radio-disabled) {
   display: inline-block;
   cursor: pointer;
+
+  &:focus {
+    background: blue;
+  }
 }
 
-.gh-radio-disabled, .gh-radio-disabled .mat-radio-label {
+.gh-radio-disabled, .gh-radio-disabled .gh-radio-label {
   cursor: default;
 }
 
@@ -38,6 +42,10 @@ $gh-radio-size: 20px;
   border-radius: 50%;
   border: solid 2px $turquoise-600;
   transition: border-color ease 280ms;
+
+  .gh-radio-disabled & {
+    border-color: $disabledcolor;
+  }
 }
 
 .gh-radio-inner-circle {
@@ -65,4 +73,8 @@ $gh-radio-size: 20px;
   font-family: $mainfont;
   font-size: 14px;
   padding-left: 8px;
+
+  .gh-radio-disabled & {
+    color: $disabledcolor;
+  }
 }
