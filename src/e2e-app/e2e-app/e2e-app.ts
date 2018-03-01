@@ -17,6 +17,7 @@ export class E2EApp {
     {name: 'Start', route: '/'},
     {name: 'Button', route: '/button'},
     {name: 'Input', route: '/input'},
+    {name: 'Radio', route: '/radio'},
     {name: 'Tile', route: '/tile'},
     {name: 'Context Menu', route: '/context-menu'}
   ];

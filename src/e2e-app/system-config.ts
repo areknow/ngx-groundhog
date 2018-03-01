@@ -47,6 +47,7 @@ System.config({
     '@dynatrace/ngx-groundhog/core': 'dist/bundles/ngx-groundhog-core.umd.js',
     '@dynatrace/ngx-groundhog/button': 'dist/bundles/ngx-groundhog-button.umd.js',
     '@dynatrace/ngx-groundhog/input': 'dist/bundles/ngx-groundhog-input.umd.js',
+    '@dynatrace/ngx-groundhog/radio': 'dist/bundles/ngx-groundhog-radio.umd.js',
     '@dynatrace/ngx-groundhog/form-field': 'dist/bundles/ngx-groundhog-form-field.umd.js',
     '@dynatrace/ngx-groundhog/tile': 'dist/bundles/ngx-groundhog-tile.umd.js',
     '@dynatrace/ngx-groundhog/context-menu': 'dist/bundles/ngx-groundhog-context-menu.umd.js',

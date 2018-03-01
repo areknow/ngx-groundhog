@@ -1,0 +1,12 @@
+<section>
+  <gh-radio-group [disabled]="isGroupDisabled"
+                  [(value)]="groupValue"
+                  id="test-group" aria-label="Select a Pokemon">
+
+    <gh-radio-button value="fire" id="fire">Charmander</gh-radio-button>
+    <gh-radio-button value="water" id="water">Squirtle</gh-radio-button>
+    <gh-radio-button value="leaf" id="leaf">Bulbasaur</gh-radio-button>
+
+  </gh-radio-group>
+  <button (click)="isGroupDisabled=!isGroupDisabled" id="toggle-disable">Disable/enable group</button>
+</section>

@@ -11,11 +11,13 @@ import {
   GhFormFieldModule,
   GhTileModule,
   GhContextMenuModule,
+  GhRadioModule,
 } from '@dynatrace/ngx-groundhog';
 import { ButtonE2E } from './button/button-e2e';
 import { InputE2E } from './input/input-e2e';
 import { TileE2E } from 'tile/tile-e2e';
 import { ContextMenuE2E } from 'context-menu/context-menu-e2e';
+import { RadioButtonsE2E } from 'radio/radio-e2e';
 
 /**
  * NgModule that contains all Groundhog modules that are required to serve the e2e-app.
@@ -24,6 +26,7 @@ import { ContextMenuE2E } from 'context-menu/context-menu-e2e';
   exports: [
     GhButtonModule,
     GhInputModule,
+    GhRadioModule,
     GhFormFieldModule,
     GhTileModule,
     GhContextMenuModule,
@@ -44,6 +47,7 @@ export class E2eNgxGroundhogModule {}
     Home,
     ButtonE2E,
     InputE2E,
+    RadioButtonsE2E,
     TileE2E,
     ContextMenuE2E,
   ],
