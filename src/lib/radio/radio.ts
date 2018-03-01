@@ -16,6 +16,7 @@ import {
   AfterViewInit,
   OnDestroy,
   OnInit,
+  AfterContentInit,
 } from '@angular/core';
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import { FocusMonitor, FocusOrigin } from '@angular/cdk/a11y';
@@ -54,12 +55,13 @@ export const _GhRadioGroupMixinBase = mixinDisabled(GhRadioGroupBase);
   },
   inputs: ['disabled'],
 })
-export class GhRadioGroup extends _GhRadioGroupMixinBase {
+export class GhRadioGroup extends _GhRadioGroupMixinBase implements AfterContentInit, CanDisable {
   private _value: any = null;
   private _name: string = `gh-radio-group-${nextUniqueId++}`;
   private _selected: GhRadioButton | null = null;
   private _disabled: boolean = false;
   private _required: boolean = false;
+  private _isInitialized: boolean = false;
 
   /** Name of the radio button group. All radio buttons inside this group will use this name. */
   @Input()
@@ -119,6 +121,13 @@ export class GhRadioGroup extends _GhRadioGroupMixinBase {
     super();
   }
 
+  ngAfterContentInit() {
+    // Mark this component as initialized in AfterContentInit because the initial value can
+    // possibly be set by NgModel on MatRadioGroup, and it is possible that the OnInit of the
+    // NgModel occurs *after* the OnInit of the MatRadioGroup.
+    this._isInitialized = true;
+  }
+
   _checkSelectedRadioButton() {
     if (this._selected && !this._selected.checked) {
       this._selected.checked = true;
@@ -133,7 +142,9 @@ export class GhRadioGroup extends _GhRadioGroupMixinBase {
 
   /** Dispatch change event with current selection and group value. */
   _emitChangeEvent(): void {
-    this.change.emit({ source: this._selected!, value: this._value });
+    if (this._isInitialized) {
+      this.change.emit({ source: this._selected!, value: this._value });
+    }
   }
 
   /** Implemented as a part of ControlValueAccessor. */
@@ -358,7 +369,7 @@ export class GhRadioButton extends _GhRadioButtonMixinBase
     if (this._radioGroup) {
       this._radioGroup._controlValueAccessorChangeFn(this.value);
       this._radioGroup._touch();
-      if (this._radioGroup && this.value != this._radioGroup.value) {
+      if (this.value != this._radioGroup.value) {
         this._radioGroup._emitChangeEvent();
       }
     }
