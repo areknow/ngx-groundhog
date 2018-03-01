@@ -12,13 +12,13 @@ describe('GhRadio', () => {
     TestBed.configureTestingModule({
       imports: [GhRadioModule, FormsModule, ReactiveFormsModule],
       declarations: [
-        // FocusableRadioButton,
+        FocusableRadioButton,
         RadiosInsideRadioGroup,
         RadioGroupWithNgModel,
         RadioGroupWithFormControl,
         StandaloneRadioButtons,
-        // InterleavedRadioGroup,
-        // TranscludingWrapper
+        InterleavedRadioGroup,
+        TranscludingWrapper
       ]
     });
 
@@ -423,6 +423,218 @@ describe('GhRadio', () => {
       groupDebugElement = fixture.debugElement.query(By.directive(GhRadioGroup));
       groupInstance = groupDebugElement.injector.get<GhRadioGroup>(GhRadioGroup);
     });
+
+    it('should toggle the disabled state', () => {
+      expect(groupInstance.disabled).toBeFalsy();
+
+      testComponent.formControl.disable();
+      fixture.detectChanges();
+
+      expect(groupInstance.disabled).toBeTruthy();
+
+      testComponent.formControl.enable();
+      fixture.detectChanges();
+
+      expect(groupInstance.disabled).toBeFalsy();
+    });
+  });
+
+  describe('as standalone', () => {
+    let fixture: ComponentFixture<StandaloneRadioButtons>;
+    let radioDebugElements: DebugElement[];
+    let seasonRadioInstances: GhRadioButton[];
+    let weatherRadioInstances: GhRadioButton[];
+    let fruitRadioInstances: GhRadioButton[];
+    let fruitRadioNativeInputs: HTMLElement[];
+    let testComponent: StandaloneRadioButtons;
+
+    beforeEach(() => {
+      fixture = TestBed.createComponent(StandaloneRadioButtons);
+      fixture.detectChanges();
+
+      testComponent = fixture.debugElement.componentInstance;
+
+      radioDebugElements = fixture.debugElement.queryAll(By.directive(GhRadioButton));
+      seasonRadioInstances = radioDebugElements
+        .filter(debugEl => debugEl.componentInstance.name == 'season')
+        .map(debugEl => debugEl.componentInstance);
+      weatherRadioInstances = radioDebugElements
+        .filter(debugEl => debugEl.componentInstance.name == 'weather')
+        .map(debugEl => debugEl.componentInstance);
+      fruitRadioInstances = radioDebugElements
+        .filter(debugEl => debugEl.componentInstance.name == 'fruit')
+        .map(debugEl => debugEl.componentInstance);
+
+      const fruitRadioNativeElements = radioDebugElements
+        .filter(debugEl => debugEl.componentInstance.name == 'fruit')
+        .map(debugEl => debugEl.nativeElement);
+
+      fruitRadioNativeInputs = [];
+      for (const element of fruitRadioNativeElements) {
+        fruitRadioNativeInputs.push(<HTMLElement>element.querySelector('input'));
+      }
+    });
+
+    it('should uniquely select radios by a name', () => {
+      seasonRadioInstances[0].checked = true;
+      weatherRadioInstances[1].checked = true;
+
+      fixture.detectChanges();
+      expect(seasonRadioInstances[0].checked).toBe(true);
+      expect(seasonRadioInstances[1].checked).toBe(false);
+      expect(seasonRadioInstances[2].checked).toBe(false);
+      expect(weatherRadioInstances[0].checked).toBe(false);
+      expect(weatherRadioInstances[1].checked).toBe(true);
+      expect(weatherRadioInstances[2].checked).toBe(false);
+
+      seasonRadioInstances[1].checked = true;
+      fixture.detectChanges();
+      expect(seasonRadioInstances[0].checked).toBe(false);
+      expect(seasonRadioInstances[1].checked).toBe(true);
+      expect(seasonRadioInstances[2].checked).toBe(false);
+      expect(weatherRadioInstances[0].checked).toBe(false);
+      expect(weatherRadioInstances[1].checked).toBe(true);
+      expect(weatherRadioInstances[2].checked).toBe(false);
+
+      weatherRadioInstances[2].checked = true;
+      expect(seasonRadioInstances[0].checked).toBe(false);
+      expect(seasonRadioInstances[1].checked).toBe(true);
+      expect(seasonRadioInstances[2].checked).toBe(false);
+      expect(weatherRadioInstances[0].checked).toBe(false);
+      expect(weatherRadioInstances[1].checked).toBe(false);
+      expect(weatherRadioInstances[2].checked).toBe(true);
+    });
+
+    it('should add required attribute to the underlying input element if defined', () => {
+      const radioInstance = seasonRadioInstances[0];
+      radioInstance.required = true;
+      fixture.detectChanges();
+
+      expect(radioInstance.required).toBe(true);
+    });
+
+    it('should add aria-label attribute to the underlying input element if defined', () => {
+      expect(fruitRadioNativeInputs[0].getAttribute('aria-label')).toBe('Banana');
+    });
+
+    it('should not add aria-label attribute if not defined', () => {
+      expect(fruitRadioNativeInputs[1].hasAttribute('aria-label')).toBeFalsy();
+    });
+
+    it('should change aria-label attribute if property is changed at runtime', () => {
+      expect(fruitRadioNativeInputs[0].getAttribute('aria-label')).toBe('Banana');
+
+      testComponent.ariaLabel = 'Pineapple';
+      fixture.detectChanges();
+
+      expect(fruitRadioNativeInputs[0].getAttribute('aria-label')).toBe('Pineapple');
+    });
+
+    it('should add aria-labelledby attribute to the underlying input element if defined', () => {
+      expect(fruitRadioNativeInputs[0].getAttribute('aria-labelledby')).toBe('xyz');
+    });
+
+    it('should not add aria-labelledby attribute if not defined', () => {
+      expect(fruitRadioNativeInputs[1].hasAttribute('aria-labelledby')).toBeFalsy();
+    });
+
+    it('should change aria-labelledby attribute if property is changed at runtime', () => {
+      expect(fruitRadioNativeInputs[0].getAttribute('aria-labelledby')).toBe('xyz');
+
+      testComponent.ariaLabelledby = 'uvw';
+      fixture.detectChanges();
+
+      expect(fruitRadioNativeInputs[0].getAttribute('aria-labelledby')).toBe('uvw');
+    });
+
+    it('should add aria-describedby attribute to the underlying input element if defined', () => {
+      expect(fruitRadioNativeInputs[0].getAttribute('aria-describedby')).toBe('abc');
+    });
+
+    it('should not add aria-describedby attribute if not defined', () => {
+      expect(fruitRadioNativeInputs[1].hasAttribute('aria-describedby')).toBeFalsy();
+    });
+
+    it('should change aria-describedby attribute if property is changed at runtime', () => {
+      expect(fruitRadioNativeInputs[0].getAttribute('aria-describedby')).toBe('abc');
+
+      testComponent.ariaDescribedby = 'uvw';
+      fixture.detectChanges();
+
+      expect(fruitRadioNativeInputs[0].getAttribute('aria-describedby')).toBe('uvw');
+    });
+
+    it('should focus on underlying input element when focus() is called', () => {
+      for (let i = 0; i < fruitRadioInstances.length; i++) {
+        expect(document.activeElement).not.toBe(fruitRadioNativeInputs[i]);
+        fruitRadioInstances[i].focus();
+        fixture.detectChanges();
+
+        expect(document.activeElement).toBe(fruitRadioNativeInputs[i]);
+      }
+    });
+
+    it('should not add the "name" attribute if it is not passed in', () => {
+      const radio = fixture.debugElement.nativeElement.querySelector('#nameless input');
+      expect(radio.hasAttribute('name')).toBe(false);
+    });
+  });
+
+  describe('with tabindex', () => {
+    let fixture: ComponentFixture<FocusableRadioButton>;
+
+    beforeEach(() => {
+      fixture = TestBed.createComponent(FocusableRadioButton);
+      fixture.detectChanges();
+    });
+
+    it('should forward focus to native input', () => {
+      let radioButtonEl = fixture.debugElement.query(By.css('.gh-radio-button')).nativeElement;
+      let inputEl = fixture.debugElement.query(By.css('.gh-radio-input')).nativeElement;
+
+      radioButtonEl.focus();
+      // Focus events don't always fire in tests, so we need to fake it.
+      dispatchFakeEvent(radioButtonEl, 'focus');
+      fixture.detectChanges();
+
+      expect(document.activeElement).toBe(inputEl);
+    });
+
+    it('should allow specifying an explicit tabindex for a single radio-button', () => {
+      const radioButtonInput = fixture.debugElement
+        .query(By.css('.gh-radio-button input')).nativeElement as HTMLInputElement;
+
+      expect(radioButtonInput.tabIndex)
+        .toBe(0, 'Expected the tabindex to be set to "0" by default.');
+
+      fixture.componentInstance.tabIndex = 4;
+      fixture.detectChanges();
+
+      expect(radioButtonInput.tabIndex)
+        .toBe(4, 'Expected the tabindex to be set to "4".');
+    });
+  });
+
+  describe('group interspersed with other tags', () => {
+    let fixture: ComponentFixture<InterleavedRadioGroup>;
+    let groupDebugElement: DebugElement;
+    let groupInstance: GhRadioGroup;
+    let radioDebugElements: DebugElement[];
+    let radioInstances: GhRadioButton[];
+
+    beforeEach(async(() => {
+      fixture = TestBed.createComponent(InterleavedRadioGroup);
+      fixture.detectChanges();
+
+      groupDebugElement = fixture.debugElement.query(By.directive(GhRadioGroup));
+      groupInstance = groupDebugElement.injector.get<GhRadioGroup>(GhRadioGroup);
+      radioDebugElements = fixture.debugElement.queryAll(By.directive(GhRadioButton));
+      radioInstances = radioDebugElements.map(debugEl => debugEl.componentInstance);
+    }));
+
+    it('should initialize selection of radios based on model value', () => {
+      expect(groupInstance.selected).toBe(radioInstances[2]);
+    });
   });
 });
 
@@ -484,9 +696,9 @@ class StandaloneRadioButtons {
 class RadioGroupWithNgModel {
   modelValue: string;
   options = [
-    {label: 'Vanilla', value: 'vanilla'},
-    {label: 'Chocolate', value: 'chocolate'},
-    {label: 'Strawberry', value: 'strawberry'},
+    { label: 'Vanilla', value: 'vanilla' },
+    { label: 'Chocolate', value: 'chocolate' },
+    { label: 'Strawberry', value: 'strawberry' },
   ];
   lastEvent: GhRadioChange;
 }
@@ -501,3 +713,36 @@ class RadioGroupWithNgModel {
 class RadioGroupWithFormControl {
   formControl = new FormControl();
 }
+
+@Component({
+  template: `<gh-radio-button [tabIndex]="tabIndex"></gh-radio-button>`
+})
+class FocusableRadioButton {
+  tabIndex: number;
+}
+
+@Component({
+  template: `
+  <gh-radio-group name="group" [(ngModel)]="modelValue">
+    <transcluding-wrapper *ngFor="let option of options">
+      <gh-radio-button [value]="option.value">{{option.label}}</gh-radio-button>
+    </transcluding-wrapper>
+  </gh-radio-group>
+  `
+})
+class InterleavedRadioGroup {
+  modelValue = 'strawberry';
+  options = [
+    { label: 'Vanilla', value: 'vanilla' },
+    { label: 'Chocolate', value: 'chocolate' },
+    { label: 'Strawberry', value: 'strawberry' },
+  ];
+}
+
+@Component({
+  selector: 'transcluding-wrapper',
+  template: `
+    <div><ng-content></ng-content></div>
+  `
+})
+class TranscludingWrapper { }
