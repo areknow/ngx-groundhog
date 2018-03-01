@@ -303,6 +303,7 @@ export class GhRadioButton extends _GhRadioButtonMixinBase
   @ViewChild('input') _inputElement: ElementRef;
 
   constructor(
+    private _elementRef: ElementRef,
     private _changeDetector: ChangeDetectorRef,
     private _radioDispatcher: UniqueSelectionDispatcher,
     private _focusMonitor: FocusMonitor,
@@ -373,9 +374,18 @@ export class GhRadioButton extends _GhRadioButtonMixinBase
   }
 
   private _onInputFocusChange(focusOrigin: FocusOrigin) {
+    this._toggleClass(this._elementRef.nativeElement,
+      'gh-radio-focused', focusOrigin === 'keyboard');
     if (!focusOrigin && this._radioGroup) {
       this._radioGroup._touch();
     }
   }
 
+  private _toggleClass(element: Element, className: string, shouldSet: boolean) {
+    if (shouldSet) {
+      element.classList.add(className);
+    } else {
+      element.classList.remove(className);
+    }
+  }
 }
