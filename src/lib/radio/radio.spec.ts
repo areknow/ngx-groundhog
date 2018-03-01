@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { async, ComponentFixture, TestBed, tick, fakeAsync } from '@angular/core/testing';
 import { FormControl, FormsModule, NgModel, ReactiveFormsModule } from '@angular/forms';
 import { Component, DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
@@ -14,8 +14,8 @@ describe('GhRadio', () => {
       declarations: [
         // FocusableRadioButton,
         RadiosInsideRadioGroup,
-        // RadioGroupWithNgModel,
-        // RadioGroupWithFormControl,
+        RadioGroupWithNgModel,
+        RadioGroupWithFormControl,
         StandaloneRadioButtons,
         // InterleavedRadioGroup,
         // TranscludingWrapper
@@ -172,22 +172,21 @@ describe('GhRadio', () => {
       expect(spies[1]).toHaveBeenCalledTimes(1);
     });
 
-    // TODO @thomaspink: Not quit sure why this fails. Investigate
-    // it(`should not emit a change event from the radio group when change group
-    //   value programmatically`, () => {
-    //     expect(groupInstance.value).toBeFalsy();
+    it(`should not emit a change event from the radio group when change group
+      value programmatically`, () => {
+        expect(groupInstance.value).toBeFalsy();
 
-    //     const changeSpy = jasmine.createSpy('radio-group change listener');
-    //     groupInstance.change.subscribe(changeSpy);
+        const changeSpy = jasmine.createSpy('radio-group change listener');
+        groupInstance.change.subscribe(changeSpy);
 
-    //     radioLabelElements[0].click();
-    //     fixture.detectChanges();
+        radioLabelElements[0].click();
+        fixture.detectChanges();
 
-    //     expect(changeSpy).toHaveBeenCalledTimes(1);
-    //     groupInstance.value = 'water';
-    //     fixture.detectChanges();
-    //     expect(changeSpy).toHaveBeenCalledTimes(1);
-    //   });
+        expect(changeSpy).toHaveBeenCalledTimes(1);
+        groupInstance.value = 'water';
+        fixture.detectChanges();
+        expect(changeSpy).toHaveBeenCalledTimes(1);
+      });
 
     it('should update the group and radios when updating the group value', () => {
       expect(groupInstance.value).toBeFalsy();
@@ -237,6 +236,26 @@ describe('GhRadio', () => {
 
     it(`should update the group's selected radio to null when unchecking that radio
         programmatically`, () => {
+        const changeSpy = jasmine.createSpy('radio-group change listener');
+        groupInstance.change.subscribe(changeSpy);
+        radioInstances[0].checked = true;
+
+        fixture.detectChanges();
+
+        expect(changeSpy).not.toHaveBeenCalled();
+        expect(groupInstance.value).toBeTruthy();
+
+        radioInstances[0].checked = false;
+
+        fixture.detectChanges();
+
+        expect(changeSpy).not.toHaveBeenCalled();
+        expect(groupInstance.value).toBeFalsy();
+        expect(radioInstances.every(radio => !radio.checked)).toBe(true);
+        expect(groupInstance.selected).toBeNull();
+      });
+
+    it('should not fire a change event from the group when a radio checked state changes', () => {
       const changeSpy = jasmine.createSpy('radio-group change listener');
       groupInstance.change.subscribe(changeSpy);
       radioInstances[0].checked = true;
@@ -245,15 +264,164 @@ describe('GhRadio', () => {
 
       expect(changeSpy).not.toHaveBeenCalled();
       expect(groupInstance.value).toBeTruthy();
+      expect(groupInstance.value).toBe('fire');
 
-      radioInstances[0].checked = false;
+      radioInstances[1].checked = true;
 
       fixture.detectChanges();
 
+      expect(groupInstance.value).toBe('water');
       expect(changeSpy).not.toHaveBeenCalled();
+    });
+
+    it(`should update checked status if changed value to radio group's value`, () => {
+      const changeSpy = jasmine.createSpy('radio-group change listener');
+      groupInstance.change.subscribe(changeSpy);
+      groupInstance.value = 'apple';
+
+      expect(changeSpy).not.toHaveBeenCalled();
+      expect(groupInstance.value).toBe('apple');
+      expect(groupInstance.selected).toBeFalsy('expect group selected to be null');
+      expect(radioInstances[0].checked).toBeFalsy('should not select the first button');
+      expect(radioInstances[1].checked).toBeFalsy('should not select the second button');
+      expect(radioInstances[2].checked).toBeFalsy('should not select the third button');
+
+      radioInstances[0].value = 'apple';
+
+      fixture.detectChanges();
+
+      expect(groupInstance.selected).toBe(
+        radioInstances[0], 'expect group selected to be first button');
+      expect(radioInstances[0].checked).toBeTruthy('expect group select the first button');
+      expect(radioInstances[1].checked).toBeFalsy('should not select the second button');
+      expect(radioInstances[2].checked).toBeFalsy('should not select the third button');
+    });
+  });
+
+  describe('group with ngModel', () => {
+    let fixture: ComponentFixture<RadioGroupWithNgModel>;
+    let groupDebugElement: DebugElement;
+    let radioDebugElements: DebugElement[];
+    let innerRadios: DebugElement[];
+    let radioLabelElements: HTMLLabelElement[];
+    let groupInstance: GhRadioGroup;
+    let radioInstances: GhRadioButton[];
+    let testComponent: RadioGroupWithNgModel;
+    let groupNgModel: NgModel;
+
+    beforeEach(() => {
+      fixture = TestBed.createComponent(RadioGroupWithNgModel);
+      fixture.detectChanges();
+
+      testComponent = fixture.debugElement.componentInstance;
+
+      groupDebugElement = fixture.debugElement.query(By.directive(GhRadioGroup));
+      groupInstance = groupDebugElement.injector.get<GhRadioGroup>(GhRadioGroup);
+      groupNgModel = groupDebugElement.injector.get<NgModel>(NgModel);
+
+      radioDebugElements = fixture.debugElement.queryAll(By.directive(GhRadioButton));
+      radioInstances = radioDebugElements.map(debugEl => debugEl.componentInstance);
+      innerRadios = fixture.debugElement.queryAll(By.css('input[type="radio"]'));
+
+      radioLabelElements = radioDebugElements
+        .map(debugEl => debugEl.query(By.css('label')).nativeElement);
+    });
+
+    it('should set individual radio names based on the group name', () => {
+      expect(groupInstance.name).toBeTruthy();
+      for (const radio of radioInstances) {
+        expect(radio.name).toBe(groupInstance.name);
+      }
+
+      groupInstance.name = 'new name';
+
+      for (const radio of radioInstances) {
+        expect(radio.name).toBe(groupInstance.name);
+      }
+    });
+
+    it('should check the corresponding radio button on group value change', () => {
       expect(groupInstance.value).toBeFalsy();
-      expect(radioInstances.every(radio => !radio.checked)).toBe(true);
-      expect(groupInstance.selected).toBeNull();
+      for (const radio of radioInstances) {
+        expect(radio.checked).toBeFalsy();
+      }
+
+      groupInstance.value = 'vanilla';
+      for (const radio of radioInstances) {
+        expect(radio.checked).toBe(groupInstance.value === radio.value);
+      }
+      expect(groupInstance.selected!.value).toBe(groupInstance.value);
+    });
+
+    it('should have the correct control state initially and after interaction', () => {
+      // The control should start off valid, pristine, and untouched.
+      expect(groupNgModel.valid).toBe(true);
+      expect(groupNgModel.pristine).toBe(true);
+      expect(groupNgModel.touched).toBe(false);
+
+      // After changing the value programmatically, the control should stay pristine
+      // but remain untouched.
+      radioInstances[1].checked = true;
+      fixture.detectChanges();
+
+      expect(groupNgModel.valid).toBe(true);
+      expect(groupNgModel.pristine).toBe(true);
+      expect(groupNgModel.touched).toBe(false);
+
+      // After a user interaction occurs (such as a click), the control should become dirty and
+      // now also be touched.
+      radioLabelElements[2].click();
+      fixture.detectChanges();
+
+      expect(groupNgModel.valid).toBe(true);
+      expect(groupNgModel.pristine).toBe(false);
+      expect(groupNgModel.touched).toBe(true);
+    });
+
+    it('should write to the radio button based on ngModel', fakeAsync(() => {
+      testComponent.modelValue = 'chocolate';
+
+      fixture.detectChanges();
+      tick();
+      fixture.detectChanges();
+
+      expect(innerRadios[1].nativeElement.checked).toBe(true);
+      expect(radioInstances[1].checked).toBe(true);
+    }));
+
+    it('should update the ngModel value when selecting a radio button', () => {
+      dispatchFakeEvent(innerRadios[1].nativeElement, 'change');
+      fixture.detectChanges();
+      expect(testComponent.modelValue).toBe('chocolate');
+    });
+
+    it('should update the model before firing change event', () => {
+      expect(testComponent.modelValue).toBeUndefined();
+      expect(testComponent.lastEvent).toBeUndefined();
+
+      dispatchFakeEvent(innerRadios[1].nativeElement, 'change');
+      fixture.detectChanges();
+      expect(testComponent.lastEvent.value).toBe('chocolate');
+
+      dispatchFakeEvent(innerRadios[0].nativeElement, 'change');
+      fixture.detectChanges();
+      expect(testComponent.lastEvent.value).toBe('vanilla');
+    });
+  });
+
+  describe('group with FormControl', () => {
+    let fixture: ComponentFixture<RadioGroupWithFormControl>;
+    let groupDebugElement: DebugElement;
+    let groupInstance: GhRadioGroup;
+    let testComponent: RadioGroupWithFormControl;
+
+    beforeEach(() => {
+      fixture = TestBed.createComponent(RadioGroupWithFormControl);
+      fixture.detectChanges();
+
+      testComponent = fixture.debugElement.componentInstance;
+      groupDebugElement = fixture.debugElement.query(By.directive(GhRadioGroup));
+      groupInstance = groupDebugElement.injector.get<GhRadioGroup>(GhRadioGroup);
     });
   });
 });
@@ -302,4 +470,34 @@ class StandaloneRadioButtons {
   ariaLabel: string = 'Banana';
   ariaLabelledby: string = 'xyz';
   ariaDescribedby: string = 'abc';
+}
+
+@Component({
+  template: `
+  <gh-radio-group [(ngModel)]="modelValue" (change)="lastEvent = $event">
+    <gh-radio-button *ngFor="let option of options" [value]="option.value">
+      {{option.label}}
+    </gh-radio-button>
+  </gh-radio-group>
+  `
+})
+class RadioGroupWithNgModel {
+  modelValue: string;
+  options = [
+    {label: 'Vanilla', value: 'vanilla'},
+    {label: 'Chocolate', value: 'chocolate'},
+    {label: 'Strawberry', value: 'strawberry'},
+  ];
+  lastEvent: GhRadioChange;
+}
+
+@Component({
+  template: `
+    <gh-radio-group [formControl]="formControl">
+      <gh-radio-button value="1">One</gh-radio-button>
+    </gh-radio-group>
+    `
+})
+class RadioGroupWithFormControl {
+  formControl = new FormControl();
 }

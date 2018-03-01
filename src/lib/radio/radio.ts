@@ -363,13 +363,14 @@ export class GhRadioButton extends _GhRadioButtonMixinBase
     // emit its event object to the `change` output.
     event.stopPropagation();
 
+    const groupValueChanged = this._radioGroup && this.value != this._radioGroup.value;
     this.checked = true;
     this._emitChangeEvent();
 
     if (this._radioGroup) {
       this._radioGroup._controlValueAccessorChangeFn(this.value);
       this._radioGroup._touch();
-      if (this.value != this._radioGroup.value) {
+      if (groupValueChanged) {
         this._radioGroup._emitChangeEvent();
       }
     }
